@@ -1,5 +1,9 @@
 # Employee Salary Prediction
 
+##  Live Demo
+
+👉 [Open the Employee Salary Prediction App](https://employee-salary-prediction-drashti.streamlit.app/)
+
 ## Project Overview
 
 This project predicts an employee's salary using Machine Learning.
