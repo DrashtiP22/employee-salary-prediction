@@ -30,16 +30,16 @@ The dataset contains employee information and their salaries.
 
 ### Features
 
- Feature          | Description 
--------------------------------------
- Age              | Employee's age 
- Gender           | Employee's gender 
- Department       | Employee's department 
- Job_Title        | Employee's job title 
- Experience_Years | Years of experience 
- Education_Level  | Employee's education level 
- Location         | Employee's location 
- Salary           | Employee's salary 
+ | Feature | Description |
+|---|---|
+| Age | Employee's age |
+| Gender | Employee's gender |
+| Department | Employee's department |
+| Job_Title | Employee's job title |
+| Experience_Years | Years of experience |
+| Education_Level | Employee's education level |
+| Location | Employee's location |
+| Salary | Employee's salary |
 
 `Salary` is the **target variable**.
 > Note: Employee ID and Name are identifiers and are not used as prediction features in the Streamlit application.
