@@ -1,9 +1,5 @@
 # Employee Salary Prediction
 
-##  Live Demo
-
-👉 [Open the Employee Salary Prediction App](https://employee-salary-prediction-drashti.streamlit.app/)
-
 ## Project Overview
 
 This project predicts an employee's salary using Machine Learning.
@@ -34,16 +30,16 @@ The dataset contains employee information and their salaries.
 
 ### Features
 
- | Feature | Description |
-|---|---|
-| Age | Employee's age |
-| Gender | Employee's gender |
-| Department | Employee's department |
-| Job_Title | Employee's job title |
-| Experience_Years | Years of experience |
-| Education_Level | Employee's education level |
-| Location | Employee's location |
-| Salary | Employee's salary |
+ Feature          | Description 
+-------------------------------------
+ Age              | Employee's age 
+ Gender           | Employee's gender 
+ Department       | Employee's department 
+ Job_Title        | Employee's job title 
+ Experience_Years | Years of experience 
+ Education_Level  | Employee's education level 
+ Location         | Employee's location 
+ Salary           | Employee's salary 
 
 `Salary` is the **target variable**.
 > Note: Employee ID and Name are identifiers and are not used as prediction features in the Streamlit application.
@@ -142,6 +138,33 @@ Shows the model evaluation results and explains why the model's performance shou
 
 Users can enter employee information and get a predicted salary.
 
+### Employee Groups
+
+The application also uses K-Means clustering to group employees based on:
+
+- Age
+- Experience
+- Salary
+
+The employees are divided into four groups:
+
+- Early Career
+- Mid Career
+- Experienced Professionals
+- Senior High Earners
+
+Users can enter age, experience and salary to identify the employee group.
+
+### Fair Offer Assessment
+
+After predicting a salary, the application compares the predicted salary with the typical salary for the selected job title and education level.
+
+The offer is classified as:
+
+- Too low
+- Fair
+- Too high
+
 
 ## Technologies Used
 
@@ -149,12 +172,11 @@ Users can enter employee information and get a predicted salary.
 - Pandas
 - NumPy
 - Scikit-learn
+- K-Means Clustering
 - Joblib
 - Plotly
 - Streamlit
 - Jupyter Notebook
-
-
 
 ## How to Run
 
@@ -182,6 +204,9 @@ Emp-Salary-Prediction/
 ├── Employee_Salary_Prediction_Analysis.ipynb
 ├── Employers_data.csv
 ├── employee_salary_model.pkl
+├── employee_group_model.pkl
+├── employee_group_scaler.pkl
 ├── requirements.txt
 └── README.md
 ```
+

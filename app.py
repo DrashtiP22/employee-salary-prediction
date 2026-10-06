@@ -1,59 +1,90 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import joblib
+import matplotlib.pyplot as plt
 import plotly.express as px
-
-# PAGE CONFIGURATION
 
 st.set_page_config(
     page_title="Employee Salary Prediction",
     page_icon="💰",
     layout="wide"
 )
-
-# LOAD DATA
-
 df = pd.read_csv("Employers_data.csv")
 model = joblib.load("employee_salary_model.pkl")
+group_model = joblib.load("employee_group_model.pkl")
+group_scaler = joblib.load("employee_group_scaler.pkl")
 
-st.title("Employee Salary Prediction")
-
-st.write(
-    "Predict employee salary based on age, gender, department, "
-    "job title, experience, education and location."
-)
-
-# SIDEBAR NAVIGATION
-
-st.sidebar.title("📊 Navigation")
+# Sidebar Navigation
+st.sidebar.title("📌 Navigation")
 
 page = st.sidebar.radio(
     "Go to",
     [
-        "📈 Dashboard",
-        "🔍 Model Validation",
-        "💰 Salary Prediction"
+        "🏠 Home",
+        "📊 Data Analysis",
+        "🤖 Salary Prediction", 
+        "🔍 Model Validation & Trust",
+        "👥 Employee Groups"
     ]
 )
+if page == "🏠 Home":
 
-# DASHBOARD PAGE
+    st.title("💰 Employee Salary Prediction")
+    st.subheader("Machine Learning Based Salary Prediction & Analysis")
 
-if page == "📈 Dashboard":
+    st.write("""
+    This application predicts an employee's salary based on information such as
+    age, gender, department, job title, experience, education level, and location.
+    """)
 
-    st.header("Salary Dataset Dashboard")
+    st.markdown("### 📌 About the Project")
+
+    st.write("""
+    The goal of this project is to build a machine learning model that can
+    predict an employee's salary using different employee-related features.
+    """)
+
+    st.markdown("### 🔎 Features Used")
+
+    st.write("""
+    - Age
+    - Gender
+    - Department
+    - Job Title
+    - Experience Years
+    - Education Level
+    - Location
+    """)
+
+    st.markdown("### 🤖 Machine Learning")
+
+    st.write("""
+    A Random Forest Regression model is used to predict salary.
+    The model is evaluated using MAE, RMSE, R² score, and cross-validation.
+    """)
+
+    st.info(
+        "💡 Use the sidebar to explore the data, analyze the model, "
+        "and predict an employee's salary."
+    )
+
+elif page == "📊 Data Analysis":
+
+    st.title("📊 Salary Data Analysis")
 
     st.write(
-        "Explore the employee salary dataset and understand "
-        "the main characteristics of the data."
+        "Explore the employee dataset and understand how different "
+        "factors are related to salary."
     )
-    
-    # Dataset Metrics
-    # -------------------------
+
+    # Dataset overview
+    st.markdown("### 📋 Dataset Overview")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("Total Employees",len(df))
+        st.metric("Total Employees", f"{len(df):,}")
 
     with col2:
         st.metric("Average Salary",f"₹{df['Salary'].mean():,.0f}")
@@ -87,7 +118,23 @@ if page == "📈 Dashboard":
         .sort_values()
     )
 
-    st.bar_chart(education_salary)
+    fig = px.bar(
+        education_salary,
+        x=education_salary.index,
+        y=education_salary.values,
+        title="Average Salary by Education Level",
+        labels={
+            "x": "Education_Level",
+            "y": "Average Salary"
+        }
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+    
+    # st.bar_chart(education_salary)
 
     # Average Salary by Job Title
     # -------------------------
@@ -99,9 +146,23 @@ if page == "📈 Dashboard":
         .mean()
         .sort_values()
     )
-    
+    fig = px.bar(
+        job_salary,
+        x=job_salary.index,
+        y=job_salary.values,
+        title="Average Salary by Job Title",
+        labels={
+            "x": "Job_Title",
+            "y": "Average Salary"
+        }
+    )
 
-    st.bar_chart(job_salary)
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+    # st.bar_chart(job_salary)
 
     # Salary Distribution
     # -------------------------
@@ -164,11 +225,152 @@ if page == "📈 Dashboard":
         use_container_width=True
     )
 
-# MODEL VALIDATION PAGE
-# ----------------------------
 
-elif page == "🔍 Model Validation":
+elif page == "🤖 Salary Prediction":
 
+    st.title("🤖 Employee Salary Prediction")
+
+    st.write(
+        "Enter the employee details below to predict the expected salary."
+    )
+
+    st.divider()
+
+    # INPUT FIELDS
+    # -------------------------
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        age = st.number_input(
+            "Age",
+            min_value=18,
+            max_value=65,
+            value=30
+        )
+
+        gender = st.selectbox(
+            "Gender",
+            df["Gender"].unique()
+        )
+
+        department = st.selectbox(
+            "Department",
+            df["Department"].unique()
+        )
+
+        job_title = st.selectbox(
+            "Job Title",
+            df["Job_Title"].unique()
+        )
+
+    with col2:
+
+        experience = st.number_input(
+            "Experience (Years)",
+            min_value=0,
+            max_value=50,
+            value=5
+        )
+
+        education = st.selectbox(
+            "Education Level",
+            df["Education_Level"].unique()
+        )
+
+        location = st.selectbox(
+            "Location",
+            df["Location"].unique()
+        )
+
+        st.divider()
+
+    # PREDICT BUTTON
+    # -------------------------
+
+    if st.button(
+        "Predict Salary",
+        use_container_width=True
+    ):
+
+        input_data = pd.DataFrame({
+            "Age": [age],
+            "Gender": [gender],
+            "Department": [department],
+            "Job_Title": [job_title],
+            "Experience_Years": [experience],
+            "Education_Level": [education],
+            "Location": [location]
+        })
+
+        prediction = model.predict(input_data)
+
+        predicted_salary = prediction[0]
+
+        # Display result
+
+        st.subheader("Prediction Result")
+
+        st.metric(
+            "Predicted Annual Salary",
+            f"₹{predicted_salary:,.0f}"
+        )
+
+        # FAIR OFFER ANALYSIS
+        # -------------------------
+        # First compare employees with the same job title and education.
+        # If fewer than 10 employees match, use the same job title only.
+        matching_data = df[
+            (df["Job_Title"] == job_title) &
+            (df["Education_Level"] == education)
+        ]
+
+        if len(matching_data) >= 10:
+            typical_salary = matching_data["Salary"].median()
+            comparison_basis = "same job title and education"
+        else:
+            matching_data = df[df["Job_Title"] == job_title]
+            typical_salary = matching_data["Salary"].median()
+            comparison_basis = "same job title"
+
+        lower_limit = typical_salary * 0.90
+        upper_limit = typical_salary * 1.10
+
+        if predicted_salary < lower_limit:
+            offer_status = "Too low"
+            st.warning(f"⚠️ Fair Offer: **{offer_status}**")
+        elif predicted_salary > upper_limit:
+            offer_status = "Too high"
+            st.warning(f"⚠️ Fair Offer: **{offer_status}**")
+        else:
+            offer_status = "Fair"
+            st.success(f"✅ Fair Offer: **{offer_status}**")
+
+        st.metric(
+            "Typical Salary",
+            f"₹{typical_salary:,.0f}"
+        )
+
+        st.caption(
+            f"Typical salary calculated using the median of {len(matching_data)} "
+            f"matching employees ({comparison_basis})."
+        )
+
+        # st.success(
+        #     f" Predicted Salary: ₹{predicted_salary:,.2f}"
+        # )
+
+        st.info(
+            "The prediction is generated using the saved machine "
+            "learning pipeline, including preprocessing and the "
+            "trained regression model."
+        )
+   
+
+elif page == "🔍 Model Validation & Trust":
+    st.title(" Model Validation & Trust")
+    
     st.header("Model Validation & Trust")
 
     st.write(
@@ -324,105 +526,86 @@ elif page == "🔍 Model Validation":
     )
 
 
-# SALARY PREDICTION PAGE
+# EMPLOYEE GROUPS PAGE
 # ----------------------------------------
 
-elif page == "💰 Salary Prediction":
+elif page == "👥 Employee Groups":
 
-    st.header("Predict Employee Salary")
+    st.header("Employee Groups")
 
     st.write(
-            "Enter employee details below to predict the expected salary."
+        "Group employees based on age, experience and salary using K-Means."
     )
 
     st.divider()
 
-    # INPUT FIELDS
-    # -------------------------
+    group_names = {
+        0: "Senior High Earners",
+        1: "Early Career",
+        2: "Mid Career",
+        3: "Experienced Professionals"
+    }
 
-    col1, col2 = st.columns(2)
+    group_features = df[["Age", "Experience_Years", "Salary"]]
+    scaled_group_data = group_scaler.transform(group_features)
+    df_groups = df.copy()
+    df_groups["Employee_Group"] = group_model.predict(scaled_group_data)
+    df_groups["Group_Name"] = df_groups["Employee_Group"].map(group_names)
 
-    with col1:
+    st.subheader("Employees in Each Group")
 
-        age = st.number_input(
-            "Age",
-            min_value=18,
-            max_value=65,
-            value=30
-        )
+    group_counts = (
+        df_groups["Group_Name"]
+        .value_counts()
+        .reindex(group_names.values(), fill_value=0)
+    )
 
-        gender = st.selectbox(
-            "Gender",
-            df["Gender"].unique()
-        )
+    counts_table = group_counts.rename("Number of Employees").reset_index()
+    counts_table.columns = ["Employee Group", "Number of Employees"]
 
-        department = st.selectbox(
-            "Department",
-            df["Department"].unique()
-        )
+    st.dataframe(counts_table, use_container_width=True, hide_index=True)
 
-        job_title = st.selectbox(
-            "Job Title",
-            df["Job_Title"].unique()
-        )
+    st.subheader("Group Averages")
 
-    with col2:
+    group_summary = (
+        df_groups.groupby("Group_Name")[["Age", "Experience_Years", "Salary"]]
+        .mean()
+        .reindex(group_names.values())
+        .round(2)
+        .reset_index()
+    )
 
-        experience = st.number_input(
-            "Experience (Years)",
-            min_value=0,
-            max_value=50,
-            value=5
-        )
+    group_summary["Salary"] = group_summary["Salary"].map(lambda x: f"₹{x:,.0f}")
+    group_summary.columns = [
+        "Employee Group", "Average Age", "Average Experience", "Average Salary"
+    ]
 
-        education = st.selectbox(
-            "Education Level",
-            df["Education_Level"].unique()
-        )
-
-        location = st.selectbox(
-            "Location",
-            df["Location"].unique()
-        )
+    st.dataframe(group_summary, use_container_width=True, hide_index=True)
 
     st.divider()
 
-    # PREDICT BUTTON
-    # -------------------------
+    st.subheader("Find an Employee's Group")
+    st.write("Enter age, experience and salary to see which employee group they belong to.")
 
-    if st.button(
-        "Predict Salary",
-        use_container_width=True
-    ):
+    col1, col2, col3 = st.columns(3)
 
-        input_data = pd.DataFrame({
-            "Age": [age],
-            "Gender": [gender],
-            "Department": [department],
-            "Job_Title": [job_title],
-            "Experience_Years": [experience],
-            "Education_Level": [education],
-            "Location": [location]
-        })
+    with col1:
+        group_age = st.number_input("Age", min_value=18, max_value=65, value=22)
 
-        prediction = model.predict(input_data)
+    with col2:
+        group_experience = st.number_input("Experience (Years)", min_value=0, max_value=50, value=1)
 
-        predicted_salary = prediction[0]
+    with col3:
+        group_salary = st.number_input("Salary", min_value=0, value=35000, step=5000)
 
-        # Display result
+    if st.button("Find Employee Group", use_container_width=True):
 
-        st.subheader("Prediction Result")
+        new_employee = np.array([[group_age, group_experience, group_salary]])
+        new_employee_scaled = group_scaler.transform(new_employee)
+        predicted_group = group_model.predict(new_employee_scaled)[0]
+        predicted_group_name = group_names[predicted_group]
 
-        st.metric(
-            "Predicted Annual Salary",
-            f"₹{predicted_salary:,.0f}"
-        )
-        # st.success(
-        #     f" Predicted Salary: ₹{predicted_salary:,.2f}"
-        # )
+        st.success(f"Employee Group: **{predicted_group_name}**")
 
-        st.info(
-            "The prediction is generated using the saved machine "
-            "learning pipeline, including preprocessing and the "
-            "trained regression model."
-        )
+
+
